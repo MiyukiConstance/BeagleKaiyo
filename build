@@ -1,0 +1,6 @@
+#!/bin/sh
+
+gcc lstnSwitch.c -o lstnSwitch
+
+pasm -b pwm.p
+gcc setPWM.c -o setPWM -lpthread -lprussdrv

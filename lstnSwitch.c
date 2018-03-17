@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
    }
 
 	struct termios options;
-
+	int sendok = 0;
 	int fd;
 	// Open device
 	fd  = file =  open("/dev/ttyO2", O_RDWR | O_NOCTTY |O_NDELAY);
@@ -72,12 +72,23 @@ for(;;){
 
 	printf("\nDevice ID           : %02x %02x %02x %02x \n", receive[9], receive[10], receive[11], receive[12]);	
 
+	int value = 10;
+
 	switch (command)
 	{
-	case 0x50	:	printf("Command Received    : UP (0x50)\n"); break;
-	case 0x70	:	printf("Command Received    : DOWN (0x70)\n"); break;
-	case 0x00	:	printf("Command Received    : STOP (0x00)\n"); break;
-	default 	:	printf("fuck");
+	case 0x50	:	printf("Command Received    : UP (0x50)\n");
+	value = 1;
+	sendok = 1;
+	break;
+	case 0x70	:	printf("Command Received    : DOWN (0x70)\n");
+	value = 2; 
+	sendok = 1;
+	break;
+	case 0x00	:	printf("Command Received    : STOP (0x00)\n");
+	value = 3;
+	sendok = 0;
+	break;
+	default 	:	printf("this was never supposed to append");
 	}
 
 	printf("Destination Address : %02x %02x %02x %02x \n\n", receive[14], receive[15], receive[16], receive[17]);
@@ -86,12 +97,16 @@ key_t	ShmKEY;
 int	ShmID;
 struct Memory *ShmPTR;
 
+if (sendok == 1) {
+
 ShmKEY = ftok(".", 'x');
 ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | 0666);
 if (ShmID < 0) {
 	printf("*** shmget error (server) ***\n");
 	exit(1);
 	       }
+
+//if (sendok = 1) {
 printf("server received four interger stufdf\n");
 
 ShmPTR = (struct Memory *) shmat(ShmID, NULL, 0);
@@ -99,6 +114,8 @@ if ((int) ShmPTR == -1) {
 	printf("*** shmat error (server) ****\n");
 	exit(1);
 			}
+//if (sendok = 1) {
+
 printf("server as attached the shared memory\n");
 
 ShmPTR->status = NOT_READY;
@@ -107,7 +124,8 @@ ShmPTR->data[1] = receive[10];
 ShmPTR->data[2] = receive[11];
 ShmPTR->data[3] = receive[12];
 
-ShmPTR->data[4] = receive[7];
+//ShmPTR->data[4] = receive[7];
+ShmPTR->data[4] = value;
 
 ShmPTR->data[5] = receive[14];
 ShmPTR->data[6] = receive[15];
@@ -120,8 +138,12 @@ printf("Start the client in another window\n");
 // flush the uart
 tcsetattr(fd, TCSAFLUSH, &options);
 
-system("./client");
- 
+// system("./client");
+
+//	if (sendok = 1) {
+
+   system("./setPWM");
+
 while (ShmPTR->status != TAKEN) {
 	sleep(1);
 				}
@@ -130,7 +152,7 @@ shmdt((void *) ShmPTR);
 printf("Server detatched its memory");
 shmctl(ShmID, IPC_RMID, NULL);
 printf("Server has removed its shared memory \n");
-
+} // en theorie
    }
 }   // celui du for
    close(file);
