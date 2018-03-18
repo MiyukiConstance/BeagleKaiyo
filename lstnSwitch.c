@@ -1,13 +1,10 @@
-/* Simple send and receive C example for communicating with the
-*  Arduino echo program using UART4. 
-*
-* Written by Derek Molloy for the book "Exploring BeagleBone: Tools and 
-* Techniques for Building with Embedded Linux" by John Wiley & Sons, 2014
-* ISBN 9781118935125. Please see the file README.md in the repository root 
-* directory for copyright and GNU GPLv3 license information.
-*
-*                       NOT EVEN THAT ANYMORE!!!!!!!!
-*
+/* 
+*  This program listen for the magnum Enocean remote control to send
+*  3 strings, there is no choice up, down and the damm stop
+*  the keys are known to men, and in this program
+*  Once received, the value is put in shared memory and i acces it with
+*  another program, which I use to make the pruss output pwm
+*  based on mollow work and anpther dude
 *            */
 
 #include<stdio.h>
@@ -20,12 +17,13 @@
 #include<termios.h>
 #include<string.h>
 
-#include"shm-02.h"
+#include"shm-02.h"  // For shared memory
 
 int main(int argc, char *argv[]){
    int file, count;
    if(argc!=2){
        printf("Invalid number of arguments, exiting!\n");
+       printf("originaly it was on, off and ...\n");
        return -2;
    }
 
@@ -34,11 +32,11 @@ int main(int argc, char *argv[]){
 	int fd;
 	// Open device
 	fd  = file =  open("/dev/ttyO2", O_RDWR | O_NOCTTY |O_NDELAY);
-	if (fd == -1) return -2;	// If the device
+	if (fd == -1) return -2;	
 	fcntl(fd, F_SETFL, FNDELAY); 
 
-     tcgetattr(fd, &options);
-     bzero(&options, sizeof(options)); // c'est la seule chose qui manque
+    	 tcgetattr(fd, &options);
+    	 bzero(&options, sizeof(options)); // c'est la seule chose qui manque
                                        // au programme original pour partir tout seul
 
    options.c_cflag = B57600 | CS8 | CREAD | CLOCAL;
@@ -48,11 +46,11 @@ int main(int argc, char *argv[]){
 
 
 
-   // send the string plus the null character
-   if ((count = write(file, argv[1], strlen(argv[1])+1))<0){
-      perror("Failed to write to the output\n");
-      return -1;
-   }
+// send the string plus the null character
+//   if ((count = write(file, argv[1], strlen(argv[1])+1))<0){
+//      perror("Failed to write to the output\n");
+//      return -1;
+//   }
 
 for(;;){
    usleep(200000);
@@ -106,15 +104,13 @@ if (ShmID < 0) {
 	exit(1);
 	       }
 
-//if (sendok = 1) {
-printf("server received four interger stufdf\n");
+printf("server received Enocean command and processed it\n");
 
 ShmPTR = (struct Memory *) shmat(ShmID, NULL, 0);
 if ((int) ShmPTR == -1) {
 	printf("*** shmat error (server) ****\n");
 	exit(1);
 			}
-//if (sendok = 1) {
 
 printf("server as attached the shared memory\n");
 
@@ -133,14 +129,10 @@ ShmPTR->data[7] = receive[16];
 ShmPTR->data[8] = receive[17];
 printf("the server filled shared memory\n");
 ShmPTR->status = FILLED;
-printf("Start the client in another window\n");
+printf("Starting PWM set process\n");
 
 // flush the uart
 tcsetattr(fd, TCSAFLUSH, &options);
-
-// system("./client");
-
-//	if (sendok = 1) {
 
    system("./setPWM");
 

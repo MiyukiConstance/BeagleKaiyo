@@ -16,8 +16,8 @@
 
 int main (int argc, int *argv[] ){
    if(argc!=2){
-      printf("\nYou must specify the %% of duty  cycle you stupid piece of shit \n\n");
-      printf("Like so: ./pwm 25\n\n\n");
+//      printf("\nYou must specify the %% of duty  cycle you stupid piece of shit \n\n");
+//      printf("Like so: ./pwm 25\n\n\n");
 //      exit(EXIT_FAILURE);
  }
 // ca c'est comme safe.. apres le argv a modifier
@@ -25,9 +25,9 @@ int main (int argc, int *argv[] ){
 //   printf("argc:  %d\n", argc);
 //   printf("argv[0]: \n", argv[0]);
 //   printf("argv[1]: %s\n", argv[1]);
-// unsigned int percent = atoi (argv[1]);
+//   unsigned int percent = atoi (argv[1]);
    unsigned int percent = 97;
-   printf("%d\n", percent);
+//   printf("%d\n", percent);
 
    key_t	ShmKEY;
    int		ShmID;
@@ -41,7 +41,7 @@ int main (int argc, int *argv[] ){
           printf("*** shmget error (client) ***\n");
           exit(1);
      }
-     printf("   Client has received a shared memory of four integers...\n");
+//     printf("   Client has received a shared memory of four integers...\n");
      
      ShmPTR = (struct Memory *) shmat(ShmID, NULL, 0);
      if ((int) ShmPTR == -1) {
